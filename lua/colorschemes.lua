@@ -97,7 +97,7 @@ M.colorscheme_conf = {
 --- Use a random colorscheme from the pre-defined list of colorschemes.
 M.rand_colorscheme = function()
   local colorscheme = utils.rand_element(vim.tbl_keys(M.colorscheme_conf))
-
+  colorscheme = "gruvbox_material"
   -- Load the colorscheme and its settings
   M.colorscheme_conf[colorscheme]()
 end
