@@ -341,6 +341,16 @@ lspconfig.gopls.setup{}
 lspconfig.ruby_lsp.setup{}
 >>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
 
+lspconfig.sourcekit.setup {
+  capabilities = {
+    workspace = {
+      didChangeWatchedFiles = {
+        dynamicRegistration = true,
+      },
+    },
+  },
+}
+
 lspconfig.elixirls.setup {
   cmd = { "~/.lsp/elixir/language_server.sh" },
   on_attach = custom_attach,
