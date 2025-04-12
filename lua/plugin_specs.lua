@@ -605,36 +605,88 @@ local plugin_specs = {
         'nvim-lua/plenary.nvim',
         'stevearc/dressing.nvim', -- optional for vim.ui.select
     },
-    config = true,
+    config = function()
+      require("config.flutter")
+    end,
   },
   {
     'stevearc/dressing.nvim',
     opts = {},
   },
   {
-        "mfussenegger/nvim-dap",
-        dependencies = {
-            'nvim-neotest/nvim-nio',
-            'rcarriga/nvim-dap-ui',
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      'nvim-neotest/nvim-nio',
+      'rcarriga/nvim-dap-ui',
+    },
+    event = 'VeryLazy',
+    config = function()
+      require("dapui").setup({
+        icons = { expanded = "▾", collapsed = "▸" },
+        layouts = {
+          {
+            elements = {
+              { id = "scopes", size = 0.25 },
+              "breakpoints",
+              "stacks",
+              "watches",
+            },
+            size = 10, -- columns
+            position = "bottom",
+          },
         },
-        event = 'VeryLazy',
-        config = function()
-            require("dapui").setup({
-                icons = { expanded = "▾", collapsed = "▸" },
-                layouts = {
-                    {
-                        elements = {
-                            { id = "scopes", size = 0.25 },
-                            "breakpoints",
-                            "stacks",
-                            "watches",
-                        },
-                        size = 10, -- columns
-                        position = "bottom",
-                    },
-                },
-            })
-        end
+      })
+    end
+  },
+  {
+    "Exafunction/windsurf.nvim",
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        "hrsh7th/nvim-cmp",
+    },
+    config = function ()
+      require("codeium").setup({
+        enable_cmp_source = false,
+        virtual_text = {
+            enabled = true,
+            manual = false,
+            filetypes = {},
+            default_filetype_enabled = true,
+            idle_delay = 75,
+            virtual_text_priority = 65535,
+            map_keys = true,
+            accept_fallback = nil,
+            key_bindings = {
+                -- Accept the current completion.
+                accept = "<M-l>",
+                -- Accept the next word.
+                accept_word = false,
+                -- Accept the next line.
+                accept_line = false,
+                -- Clear the virtual text.
+                clear = false,
+                -- Cycle to the next completion.
+                next = "<M-]>",
+                -- Cycle to the previous completion.
+                prev = "<M-[>",
+            }
+        },
+        workspace_root = {
+          use_lsp = true,
+        },
+    })
+    end
+  },
+  {
+    "wojciech-kulik/xcodebuild.nvim",
+      dependencies = {
+        "nvim-telescope/telescope.nvim",
+        "MunifTanjim/nui.nvim",
+        "j-hui/fidget.nvim",
+      },
+      config = function()
+        require("config.xcodebuild")
+      end
   }
 }
 
