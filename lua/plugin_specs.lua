@@ -335,6 +335,12 @@ local plugin_specs = {
     event = { "InsertEnter" },
   },
 
+<<<<<<< HEAD
+=======
+-- Auto format tools
+  { "sbdchd/neoformat", cmd = { "Neoformat" } },
+
+>>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
   -- Git command inside vim
   {
     "tpope/vim-fugitive",
@@ -555,6 +561,7 @@ local plugin_specs = {
     },
   },
   {
+<<<<<<< HEAD
     "CopilotC-Nvim/CopilotChat.nvim",
     dependencies = {
       { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
@@ -573,6 +580,8 @@ local plugin_specs = {
     end,
   },
   {
+=======
+>>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
     "smjonas/live-command.nvim",
     -- live-command supports semantic versioning via Git tags
     -- tag = "2.*",
@@ -651,6 +660,45 @@ local plugin_specs = {
                 },
             })
         end
+  },
+  {
+    "Exafunction/windsurf.nvim",
+    dependencies = {
+        "nvim-lua/plenary.nvim",
+        "hrsh7th/nvim-cmp",
+    },
+    config = function ()
+      require("codeium").setup({
+        enable_cmp_source = false,
+        virtual_text = {
+            enabled = true,
+            manual = false,
+            filetypes = {},
+            default_filetype_enabled = true,
+            idle_delay = 75,
+            virtual_text_priority = 65535,
+            map_keys = true,
+            accept_fallback = nil,
+            key_bindings = {
+                -- Accept the current completion.
+                accept = "<M-l>",
+                -- Accept the next word.
+                accept_word = false,
+                -- Accept the next line.
+                accept_line = false,
+                -- Clear the virtual text.
+                clear = false,
+                -- Cycle to the next completion.
+                next = "<M-]>",
+                -- Cycle to the previous completion.
+                prev = "<M-[>",
+            }
+        },
+        workspace_root = {
+          use_lsp = true,
+        },
+    })
+    end
   }
 }
 
