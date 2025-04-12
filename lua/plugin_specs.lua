@@ -335,12 +335,8 @@ local plugin_specs = {
     event = { "InsertEnter" },
   },
 
-<<<<<<< HEAD
-=======
 -- Auto format tools
   { "sbdchd/neoformat", cmd = { "Neoformat" } },
-
->>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
   -- Git command inside vim
   {
     "tpope/vim-fugitive",
@@ -561,27 +557,6 @@ local plugin_specs = {
     },
   },
   {
-<<<<<<< HEAD
-    "CopilotC-Nvim/CopilotChat.nvim",
-    dependencies = {
-      { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-    },
-    opts = {
-      debug = true, -- Enable debugging
-      -- See Configuration section for rest
-    },
-    cmd = { "CopilotChat" },
-  },
-  {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
-    config = function()
-      require("copilot").setup {}
-    end,
-  },
-  {
-=======
->>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
     "smjonas/live-command.nvim",
     -- live-command supports semantic versioning via Git tags
     -- tag = "2.*",

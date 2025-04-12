@@ -322,7 +322,7 @@ local enabled_lsp_servers = {
   yamlls = "yaml-language-server",
 }
 
-<<<<<<< HEAD
+
 for server_name, lsp_executable in pairs(enabled_lsp_servers) do
   if utils.executable(lsp_executable) then
     vim.lsp.enable(server_name)
@@ -335,11 +335,6 @@ for server_name, lsp_executable in pairs(enabled_lsp_servers) do
     vim.notify(msg, vim.log.levels.WARN, { title = "Nvim-config" })
   end
 end
-=======
-lspconfig.gopls.setup{}
-
-lspconfig.ruby_lsp.setup{}
->>>>>>> 8f2b3a7 (deprecation fixes, adds ruby-lsp, treesitter and codeium, deletes)
 
 lspconfig.sourcekit.setup {
   capabilities = {
@@ -356,37 +351,10 @@ lspconfig.elixirls.setup {
   on_attach = custom_attach,
 }
 
-<<<<<<< HEAD
-=======
--- Change diagnostic signs.
-fn.sign_define("DiagnosticSignError", { text = "🆇", texthl = "DiagnosticSignError" })
-fn.sign_define("DiagnosticSignWarn", { text = "⚠️", texthl = "DiagnosticSignWarn" })
-fn.sign_define("DiagnosticSignInfo", { text = "ℹ️", texthl = "DiagnosticSignInfo" })
-fn.sign_define("DiagnosticSignHint", { text = "", texthl = "DiagnosticSignHint" })
-
--- global config for diagnostic
-diagnostic.config {
-  underline = false,
-  virtual_text = false,
-  signs = true,
-  severity_sort = true,
-}
-
--- lsp.handlers["textDocument/publishDiagnostics"] = lsp.with(lsp.diagnostic.on_publish_diagnostics, {
---   underline = false,
---   virtual_text = false,
---   signs = true,
---   update_in_insert = false,
--- })
-
--- Change border of documentation hover window, See https://github.com/neovim/neovim/pull/13998.
-lsp.handlers["textDocument/hover"] = lsp.with(vim.lsp.handlers.hover, {
-  border = "rounded",
-})
-
 lspconfig.dartls.setup{
   on_attach = custom_attach,
 }
 
 lspconfig.gopls.setup{}
->>>>>>> 373e71b (Adds configuretion)
+
+lspconfig.ruby_lsp.setup{}
