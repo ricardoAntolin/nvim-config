@@ -58,7 +58,6 @@ let g:better_escape_interval = 200
 """"""""""""""""""""""""""""vim-xkbswitch settings"""""""""""""""""""""""""
 let g:XkbSwitchEnabled = 1
 
-"""""""""""""""""""""""""markdown-preview settings"""""""""""""""""""
 " Only setting this for suitable platforms
 if g:is_win || g:is_mac
   " Do not close the preview tab when switching to other buffers
