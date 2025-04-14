@@ -52,7 +52,7 @@ M.colorscheme_conf = {
     vim.cmd("colorscheme onedark_dark")
   end,
   material = function()
-    vim.g.material_style = "darker"
+    vim.g.material_style = "oceanic"
     vim.cmd("colorscheme material")
   end,
   arctic = function()
@@ -97,7 +97,7 @@ M.colorscheme_conf = {
 --- Use a random colorscheme from the pre-defined list of colorschemes.
 M.rand_colorscheme = function()
   local colorscheme = utils.rand_element(vim.tbl_keys(M.colorscheme_conf))
-  colorscheme = "gruvbox_material"
+  colorscheme = "material"
   -- Load the colorscheme and its settings
   M.colorscheme_conf[colorscheme]()
 end
