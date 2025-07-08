@@ -30,7 +30,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("n", "K", function()
       vim.lsp.buf.hover { border = "single", max_height = 25, max_width = 120 }
     end)
-  map("n", "<C-k>", vim.lsp.buf.signature_help)
+  map("n", "<C-S>", vim.lsp.buf.signature_help)
   map("n", "<space>rn", vim.lsp.buf.rename, { desc = "varialbe rename" })
   map("n", "gr", vim.lsp.buf.references, { desc = "show references" })
   map("n", "<space>qb", function()
@@ -112,6 +112,7 @@ if utils.executable("pyright") then
   }
   local merged_capability = vim.tbl_deep_extend("force", capabilities, new_capability)
 
+  vim.lsp.enable("pyright")
   lspconfig.pyright.setup {
     cmd = { "delance-langserver", "--stdio" },
     capabilities = merged_capability,
@@ -159,6 +160,7 @@ if utils.executable("ruff") then
 end
 
 if utils.executable("ltex-ls") then
+  vim.lsp.enable("ltex-ls")
   lspconfig.ltex.setup {
     cmd = { "ltex-ls" },
     filetypes = { "text", "plaintex", "tex", "markdown" },
@@ -172,6 +174,7 @@ if utils.executable("ltex-ls") then
 end
 
 if utils.executable("clangd") then
+  vim.lsp.enable("clangd")
   lspconfig.clangd.setup {
     capabilities = capabilities,
     filetypes = { "c", "cpp", "cc" },
@@ -183,6 +186,7 @@ end
 
 -- set up vim-language-server
 if utils.executable("vim-language-server") then
+  vim.lsp.enable("vimls")
   lspconfig.vimls.setup {
     flags = {
       debounce_text_changes = 500,
@@ -195,6 +199,7 @@ end
 
 -- set up bash-language-server
 if utils.executable("bash-language-server") then
+  vim.lsp.enable("bashls")
   lspconfig.bashls.setup {
     capabilities = capabilities,
   }
@@ -202,6 +207,7 @@ end
 
 -- settings for lua-language-server can be found on https://luals.github.io/wiki/settings/
 if utils.executable("lua-language-server") then
+  vim.lsp.enable("lua_ls")
   lspconfig.lua_ls.setup {
     settings = {
       Lua = {
@@ -227,6 +233,7 @@ local swift_capability = {
 }
 local merged_swift_capability = vim.tbl_deep_extend("force", capabilities, swift_capability)
 
+vim.lsp.enable("sourcekit")
 lspconfig.sourcekit.setup {
   cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")), },
   capabilities = capabilities,
@@ -237,6 +244,7 @@ lspconfig.sourcekit.setup {
   end
 }
 
+vim.lsp.enable("dartls")
 lspconfig.dartls.setup{
   settings = {
     dart = {
@@ -247,11 +255,9 @@ lspconfig.dartls.setup{
   }
 }
 
+vim.lsp.enable("gopls")
 lspconfig.gopls.setup{}
 
+vim.lsp.enable("ruby_lsp")
 lspconfig.ruby_lsp.setup{}
 
-lspconfig.kotlin_language_server.setup{
-  filetypes = { "kotlin" , "kt", "kts"},
-  cmd = { os.getenv( "HOME" ) .."/Developer/language_servers/kotlin-language-server/server/bin/kotlin-language-server" },
-}

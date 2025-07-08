@@ -30,6 +30,7 @@ nvim_tree.setup {
     icons = {
       webdev_colors = true,
     },
+    group_empty = true,
   },
   hijack_directories = {
     enable = true,
