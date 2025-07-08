@@ -1,12 +1,7 @@
-local api = vim.api
-local keymap = vim.keymap
-local lsp = vim.lsp
-local lspconfig = require("lspconfig")
-
 local utils = require("utils")
 
 vim.api.nvim_create_autocmd("LspAttach", {
-  group = vim.api.nvim_create_augroup("buf_behavior_conf", { clear = true }),
+  group = vim.api.nvim_create_augroup("lsp_buf_conf", { clear = true }),
   callback = function(event_context)
     local client = vim.lsp.get_client_by_id(event_context.data.client_id)
     -- vim.print(client.name, client.server_capabilities)
@@ -22,32 +17,62 @@ vim.api.nvim_create_autocmd("LspAttach", {
       opts = opts or {}
       opts.silent = true
       opts.buffer = bufnr
-      keymap.set(mode, l, r, opts)
+      vim.keymap.set(mode, l, r, opts)
     end
 
-  map("n", "gd", vim.lsp.buf.definition, { desc = "go to definition" })
-  map("n", "gi", vim.lsp.buf.implementation, { desc = "go to implementation" })
+    map("n", "gd", function()
+      vim.lsp.buf.definition {
+        on_list = function(options)
+          -- custom logic to avoid showing multiple definition when you use this style of code:
+          -- `local M.my_fn_name = function() ... end`.
+          -- See also post here: https://www.reddit.com/r/neovim/comments/19cvgtp/any_way_to_remove_redundant_definition_in_lua_file/
+
+          -- vim.print(options.items)
+          local unique_defs = {}
+          local def_loc_hash = {}
+
+          -- each item in options.items contain the location info for a definition provided by LSP server
+          for _, def_location in pairs(options.items) do
+            -- use filename and line number to uniquelly indentify a definition,
+            -- we do not expect/want multiple definition in single line!
+            local hash_key = def_location.filename .. def_location.lnum
+
+            if not def_loc_hash[hash_key] then
+              def_loc_hash[hash_key] = true
+              table.insert(unique_defs, def_location)
+            end
+          end
+
+          options.items = unique_defs
+
+          -- set the location list
+          ---@diagnostic disable-next-line: param-type-mismatch
+          vim.fn.setloclist(0, {}, " ", options)
+
+          -- open the location list when we have more than 1 definitions found,
+          -- otherwise, jump directly to the definition
+          if #options.items > 1 then
+            vim.cmd.lopen()
+          else
+            vim.cmd([[silent! lfirst]])
+          end
+        end,
+      }
+    end, { desc = "go to definition" })
+    map("n", "<C-]>", vim.lsp.buf.definition)
     map("n", "K", function()
       vim.lsp.buf.hover { border = "single", max_height = 25, max_width = 120 }
     end)
-  map("n", "<C-S>", vim.lsp.buf.signature_help)
-  map("n", "<space>rn", vim.lsp.buf.rename, { desc = "varialbe rename" })
-  map("n", "gr", vim.lsp.buf.references, { desc = "show references" })
-  map("n", "<space>qb", function()
-    set_qflist(bufnr)
-  end, { desc = "put buffer diagnostics to qf" })
-  map("n", "<space>ca", vim.lsp.buf.code_action, { desc = "LSP code action" })
-  map("n", "<space>wa", vim.lsp.buf.add_workspace_folder, { desc = "add workspace folder" })
-  map("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, { desc = "remove workspace folder" })
-  map("n", "<space>wl", function()
-    vim.print(vim.lsp.buf.list_workspace_folders())
-  end, { desc = "list workspace folder" })
+    map("n", "<C-k>", vim.lsp.buf.signature_help)
+    map("n", "<space>rn", vim.lsp.buf.rename, { desc = "varialbe rename" })
+    map("n", "<space>ca", vim.lsp.buf.code_action, { desc = "LSP code action" })
+    map("n", "<space>wa", vim.lsp.buf.add_workspace_folder, { desc = "add workspace folder" })
+    map("n", "<space>wr", vim.lsp.buf.remove_workspace_folder, { desc = "remove workspace folder" })
+    map("n", "<space>wl", function()
+      vim.print(vim.lsp.buf.list_workspace_folders())
+    end, { desc = "list workspace folder" })
 
     -- Set some key bindings conditional on server capabilities
-    if client.server_capabilities.documentFormattingProvider and client.name ~= "lua_ls" then
-      map({ "n", "x" }, "<space>f", vim.lsp.buf.format, { desc = "format code" })
-    end
-
     -- Disable ruff hover feature in favor of Pyright
     if client.name == "ruff" then
       client.server_capabilities.hoverProvider = false
@@ -59,20 +84,20 @@ vim.api.nvim_create_autocmd("LspAttach", {
 
     -- The blow command will highlight the current variable and its usages in the buffer.
     if client.server_capabilities.documentHighlightProvider then
-      local gid = api.nvim_create_augroup("lsp_document_highlight", { clear = true })
-      api.nvim_create_autocmd("CursorHold", {
+      local gid = vim.api.nvim_create_augroup("lsp_document_highlight", { clear = true })
+      vim.api.nvim_create_autocmd("CursorHold", {
         group = gid,
         buffer = bufnr,
         callback = function()
-          lsp.buf.document_highlight()
+          vim.lsp.buf.document_highlight()
         end,
       })
 
-      api.nvim_create_autocmd("CursorMoved", {
+      vim.api.nvim_create_autocmd("CursorMoved", {
         group = gid,
         buffer = bufnr,
         callback = function()
-          lsp.buf.clear_references()
+          vim.lsp.buf.clear_references()
         end,
       })
     end
@@ -81,149 +106,46 @@ vim.api.nvim_create_autocmd("LspAttach", {
   desc = "Configure buffer keymap and behavior based on LSP",
 })
 
-local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- Enable lsp servers when they are available
 
--- required by nvim-ufo
-capabilities.textDocument.foldingRange = {
-  dynamicRegistration = false,
-  lineFoldingOnly = true,
+local capabilities = require("lsp_utils").get_default_capabilities()
+
+vim.lsp.config("*", {
+  capabilities = capabilities,
+  flags = {
+    debounce_text_changes = 500,
+  },
+})
+
+-- A mapping from lsp server name to the executable name
+local enabled_lsp_servers = {
+  pyright = "pyright-langserver",
+  ruff = "ruff",
+  lua_ls = "lua-language-server",
+  vimls = "vim-language-server",
+  bashls = "bash-language-server",
+  yamlls = "yaml-language-server",
+  gopls = "gopls",
+  ruby_lsp = "ruby-lsp",
+  rubocop = "rubocop",
+  sourcekit = "sourcekit-lsp",
+  dartls = "dart",
+  kotlin_lsp = "kotlin-lsp",
 }
 
--- For what diagnostic is enabled in which type checking mode, check doc:
--- https://github.com/microsoft/pyright/blob/main/docs/configuration.md#diagnostic-settings-defaults
--- Currently, the pyright also has some issues displaying hover documentation:
--- https://www.reddit.com/r/neovim/comments/1gdv1rc/what_is_causeing_the_lsp_hover_docs_to_looks_like/
-
-if utils.executable("pyright") then
-  local new_capability = {
-    -- this will remove some of the diagnostics that duplicates those from ruff, idea taken and adapted from
-    -- here: https://github.com/astral-sh/ruff-lsp/issues/384#issuecomment-1989619482
-    textDocument = {
-      publishDiagnostics = {
-        tagSupport = {
-          valueSet = { 2 },
-        },
-      },
-      hover = {
-        contentFormat = { "plaintext" },
-        dynamicRegistration = true,
-      },
-    },
-  }
-  local merged_capability = vim.tbl_deep_extend("force", capabilities, new_capability)
-
-  vim.lsp.enable("pyright")
-  lspconfig.pyright.setup {
-    cmd = { "delance-langserver", "--stdio" },
-    capabilities = merged_capability,
-    settings = {
-      pyright = {
-        -- disable import sorting and use Ruff for this
-        disableOrganizeImports = true,
-        disableTaggedHints = false,
-      },
-      python = {
-        analysis = {
-          autoSearchPaths = true,
-          diagnosticMode = "workspace",
-          typeCheckingMode = "standard",
-          useLibraryCodeForTypes = true,
-          -- we can this setting below to redefine some diagnostics
-          diagnosticSeverityOverrides = {
-            deprecateTypingAliases = false,
-          },
-          -- inlay hint settings are provided by pylance?
-          inlayHints = {
-            callArgumentNames = "partial",
-            functionReturnTypes = true,
-            pytestParameters = true,
-            variableTypes = true,
-          },
-        },
-      },
-    },
-  }
-else
-  vim.notify("pyright not found!", vim.log.levels.WARN, { title = "Nvim-config" })
+for server_name, lsp_executable in pairs(enabled_lsp_servers) do
+  if utils.executable(lsp_executable) then
+    vim.lsp.enable(server_name)
+  else
+    local msg = string.format(
+      "Executable '%s' for server '%s' not found! Server will not be enabled",
+      lsp_executable,
+      server_name
+    )
+    vim.notify(msg, vim.log.levels.WARN, { title = "Nvim-config" })
+  end
 end
-
-if utils.executable("ruff") then
-  require("lspconfig").ruff.setup {
-    capabilities = capabilities,
-    init_options = {
-      -- the settings can be found here: https://docs.astral.sh/ruff/editors/settings/
-      settings = {
-        organizeImports = true,
-      },
-    },
-  }
-end
-
-if utils.executable("ltex-ls") then
-  vim.lsp.enable("ltex-ls")
-  lspconfig.ltex.setup {
-    cmd = { "ltex-ls" },
-    filetypes = { "text", "plaintex", "tex", "markdown" },
-    settings = {
-      ltex = {
-        language = "en",
-      },
-    },
-    flags = { debounce_text_changes = 300 },
-  }
-end
-
-if utils.executable("clangd") then
-  vim.lsp.enable("clangd")
-  lspconfig.clangd.setup {
-    capabilities = capabilities,
-    filetypes = { "c", "cpp", "cc" },
-    flags = {
-      debounce_text_changes = 500,
-    },
-  }
-end
-
--- set up vim-language-server
-if utils.executable("vim-language-server") then
-  vim.lsp.enable("vimls")
-  lspconfig.vimls.setup {
-    flags = {
-      debounce_text_changes = 500,
-    },
-    capabilities = capabilities,
-  }
-else
-  vim.notify("vim-language-server not found!", vim.log.levels.WARN, { title = "Nvim-config" })
-end
-
--- set up bash-language-server
-if utils.executable("bash-language-server") then
-  vim.lsp.enable("bashls")
-  lspconfig.bashls.setup {
-    capabilities = capabilities,
-  }
-end
-
--- settings for lua-language-server can be found on https://luals.github.io/wiki/settings/
-if utils.executable("lua-language-server") then
-  vim.lsp.enable("lua_ls")
-  lspconfig.lua_ls.setup {
-    settings = {
-      Lua = {
-        runtime = {
-          -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-          version = "LuaJIT",
-        },
-        hint = {
-          enable = true,
-        },
-      },
-    },
-    capabilities = capabilities,
-  }
-end
-
+local lsp = vim.lsp
 local swift_capability = {
   workspace = {
     didChangeWatchedFiles = {
@@ -233,8 +155,7 @@ local swift_capability = {
 }
 local merged_swift_capability = vim.tbl_deep_extend("force", capabilities, swift_capability)
 
-vim.lsp.enable("sourcekit")
-lspconfig.sourcekit.setup {
+lsp.config('sourcekit', {
   cmd = { vim.trim(vim.fn.system("xcrun -f sourcekit-lsp")), },
   capabilities = capabilities,
   on_init = function(client)
@@ -242,10 +163,9 @@ lspconfig.sourcekit.setup {
     -- more details: https://github.com/neovim/neovim/issues/19237#issuecomment-2237037154
     client.offset_encoding = "utf-8"
   end
-}
+})
 
-vim.lsp.enable("dartls")
-lspconfig.dartls.setup{
+lsp.config('dartls', {
   settings = {
     dart = {
       completeFunctionCalls = true,
@@ -253,11 +173,4 @@ lspconfig.dartls.setup{
       showTodos = true,
     }
   }
-}
-
-vim.lsp.enable("gopls")
-lspconfig.gopls.setup{}
-
-vim.lsp.enable("ruby_lsp")
-lspconfig.ruby_lsp.setup{}
-
+})

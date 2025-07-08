@@ -26,18 +26,29 @@ local plugin_specs = {
   { "hrsh7th/cmp-path", lazy = true },
   { "hrsh7th/cmp-buffer", lazy = true },
   { "hrsh7th/cmp-omni", lazy = true },
+  { "hrsh7th/cmp-cmdline", lazy = true },
   { "quangnguyen30192/cmp-nvim-ultisnips", lazy = true },
   {
     "hrsh7th/nvim-cmp",
     name = "nvim-cmp",
-    event = "InsertEnter",
+    event = "VeryLazy",
     config = function()
       require("config.nvim-cmp")
     end,
   },
+  -- {
+  --   "saghen/blink.cmp",
+  --   -- optional: provides snippets for the snippet source
+  --   dependencies = { "rafamadriz/friendly-snippets" },
+  --   -- use a release tag to download pre-built binaries
+  --   version = "1.*",
+  --   config = function()
+  --     require("config.blink-cmp")
+  --   end,
+  --   opts_extend = { "sources.default" },
+  -- },
   {
     "neovim/nvim-lspconfig",
-    event = { "BufRead", "BufNewFile" },
     config = function()
       require("config.lsp")
     end,
@@ -135,6 +146,16 @@ local plugin_specs = {
     branch = "v2",
   },
   { "rebelot/kanagawa.nvim", lazy = true },
+  { "miikanissi/modus-themes.nvim", priority = 1000 },
+  { "wtfox/jellybeans.nvim", priority = 1000 },
+  { "projekt0n/github-nvim-theme", name = "github-theme" },
+  { "e-ink-colorscheme/e-ink.nvim", priority = 1000 },
+  { "ficcdaf/ashen.nvim", priority = 1000 },
+  { "savq/melange-nvim", priority = 1000 },
+  { "Skardyy/makurai-nvim", priority = 1000 },
+  { "vague2k/vague.nvim", priority = 1000 },
+  { "webhooked/kanso.nvim", priority = 1000 },
+  { "zootedb0t/citruszest.nvim", priority = 1000 },
 
   -- plugins to provide nerdfont icons
   {
@@ -251,9 +272,13 @@ local plugin_specs = {
   },
 
   -- Snippet engine and snippet template
-  { "SirVer/ultisnips", dependencies = {
-    "honza/vim-snippets",
-  }, event = "InsertEnter" },
+  {
+    "SirVer/ultisnips",
+    dependencies = {
+      "honza/vim-snippets",
+    },
+    event = "InsertEnter",
+  },
 
   -- Automatic insertion and deletion of a pair of characters
   {
@@ -263,10 +288,13 @@ local plugin_specs = {
   },
 
   -- Comment plugin
-  { "tpope/vim-commentary", keys = {
-    { "gc", mode = "n" },
-    { "gc", mode = "v" },
-  } },
+  {
+    "tpope/vim-commentary",
+    keys = {
+      { "gc", mode = "n" },
+      { "gc", mode = "v" },
+    },
+  },
 
   -- Multiple cursor plugin like Sublime Text?
   -- 'mg979/vim-visual-multi'
@@ -323,6 +351,16 @@ local plugin_specs = {
     config = function()
       require("config.fugitive")
     end,
+  },
+  {
+    "NeogitOrg/neogit",
+    dependencies = {
+      "nvim-lua/plenary.nvim", -- required
+      "sindrets/diffview.nvim", -- optional - Diff integration
+      -- Only one of these is needed.
+      "ibhagwan/fzf-lua", -- optional
+    },
+    event = "User InGitRepo",
   },
 
   -- Better git log display
@@ -470,12 +508,6 @@ local plugin_specs = {
     cmd = { "OSCYank", "OSCYankReg" },
   },
 
-  -- The missing auto-completion for cmdline!
-  {
-    "gelguy/wilder.nvim",
-    build = ":UpdateRemotePlugins",
-  },
-
   -- showing keybindings
   {
     "folke/which-key.nvim",
@@ -535,7 +567,7 @@ local plugin_specs = {
     "smjonas/live-command.nvim",
     -- live-command supports semantic versioning via Git tags
     -- tag = "2.*",
-    cmd = "Preview",
+    event = "VeryLazy",
     config = function()
       require("config.live-command")
     end,

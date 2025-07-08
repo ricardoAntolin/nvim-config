@@ -59,7 +59,38 @@ M.colorscheme_conf = {
     vim.cmd("colorscheme arctic")
   end,
   kanagawa = function()
-    vim.cmd("colorscheme kanagawa-wave")
+    vim.cmd("colorscheme kanagawa-dragon")
+  end,
+  modus = function()
+    vim.cmd([[colorscheme modus]])
+  end,
+  jellybeans = function()
+    vim.cmd([[colorscheme jellybeans]])
+  end,
+  github = function()
+    vim.cmd([[colorscheme github_dark_default]])
+  end,
+  e_ink = function()
+    require("e-ink").setup()
+    vim.cmd.colorscheme("e-ink")
+  end,
+  ashen = function()
+    vim.cmd([[colorscheme ashen]])
+  end,
+  melange = function()
+    vim.cmd([[colorscheme melange]])
+  end,
+  makurai = function()
+    vim.cmd.colorscheme("makurai_warrior")
+  end,
+  vague = function()
+    vim.cmd([[colorscheme vague]])
+  end,
+  kanso = function()
+    vim.cmd([[colorscheme kanso]])
+  end,
+  citruszest = function()
+    vim.cmd([[colorscheme citruszest]])
   end,
 }
 
@@ -67,14 +98,6 @@ M.colorscheme_conf = {
 M.rand_colorscheme = function()
   local colorscheme = utils.rand_element(vim.tbl_keys(M.colorscheme_conf))
   colorscheme = "material"
-
-  if not vim.tbl_contains(vim.tbl_keys(M.colorscheme_conf), colorscheme) then
-    local msg = "Invalid colorscheme: " .. colorscheme
-    vim.notify(msg, vim.log.levels { title = "nvim-config" })
-
-    return
-  end
-
   -- Load the colorscheme and its settings
   M.colorscheme_conf[colorscheme]()
 end
