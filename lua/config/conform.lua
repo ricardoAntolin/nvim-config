@@ -28,3 +28,7 @@ require("conform").setup {
 require("conform").formatters.dart_format = {
   command = "dart format . -l 120",
 }
+
+require("conform").formatters.rubocop = {
+  command = "bundle exec rubocop -a",
+}

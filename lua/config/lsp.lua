@@ -63,7 +63,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     map("n", "K", function()
       vim.lsp.buf.hover { border = "single", max_height = 25, max_width = 120 }
     end)
-    map("n", "<C-k>", vim.lsp.buf.signature_help)
+    map("n", "<C-S>", vim.lsp.buf.signature_help)
     map("n", "<space>rn", vim.lsp.buf.rename, { desc = "varialbe rename" })
     map("n", "<space>ca", vim.lsp.buf.code_action, { desc = "LSP code action" })
     map("n", "<space>wa", vim.lsp.buf.add_workspace_folder, { desc = "add workspace folder" })
